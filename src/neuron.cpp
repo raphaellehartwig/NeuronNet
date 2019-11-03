@@ -20,6 +20,7 @@ Neuron::Neuron() : _poten(_REST_VAL_) {
 void Neuron::set_params(const NeuronParams &np, double noise) {
     params = np;
     if (std::abs(noise)>1e-8) {
+///@{
         if (params.inhib) {
             params.a *= 1-_AVAR_*noise;
             params.b *= 1+_BVAR_*noise;

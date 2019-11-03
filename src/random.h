@@ -1,6 +1,9 @@
+#ifndef RANDOM_H
+#define RANDOM_H
 #include <random>
 #include <vector>
 #include <algorithm>
+
 
 /*! \class RandomNumbers
   This is a random number class based on standard c++-11 generators.
@@ -28,11 +31,11 @@ public:
   The additional parameters are the standard parameters of these distributions.
  */
 ///@{
-    void uniform_double(std::vector<double>&, double lower=0, double upper=1);
+    void uniform_double(std::vector<double> &res, double lower=0, double upper=1);
     double uniform_double(double lower=0, double upper=1);
-    void normal(std::vector<double>&, double mean=0, double sd=1);
+    void normal(std::vector<double> &res, double mean=0, double sd=1);
     double normal(double mean=0, double sd=1);
-    void poisson(std::vector<int>&, double mean=1);
+    void poisson(std::vector<int> &res, double mean=1);
     int poisson(double mean=1);
 ///@}
 /*! @name Auxiliary function
@@ -49,3 +52,4 @@ private:
 };
 
 extern RandomNumbers* _RNG;
+#endif // RANDOM_H

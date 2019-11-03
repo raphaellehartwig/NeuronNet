@@ -62,6 +62,29 @@ size_t Network::random_connect(const double &mean_deg, const double &mean_streng
     return num_links;
 }
 
+std::pair<size_t, double> Network::degree(const size_t& n) const {
+	std::pair<size_t, double> pair;
+	pair.first = neighbors(n).size();
+	
+	for (size_t i(0); i < neighbors(n).size(); ++i) {	
+			pair.second += neighbors(n)[i].second;
+		}
+	return pair;
+}
+
+std::vector<std::pair<size_t, double> > Network::neighbors(const size_t& n) const {	 
+	std::vector<std::pair<size_t, double>> neighbors;
+	linkmap::const_iterator it;
+	
+	for(it=links.begin(); it!=links.end(); ++it) {
+		if((it->first).first == n) {
+		std::pair<size_t, double> pair((it->first).second, (*it).second);
+		neighbors.push_back(pair);
+		}
+	}
+	return neighbors;
+}
+
 std::vector<double> Network::potentials() const {
     std::vector<double> vals;
     for (size_t nn=0; nn<size(); nn++)
@@ -74,6 +97,41 @@ std::vector<double> Network::recoveries() const {
     for (size_t nn=0; nn<size(); nn++)
         vals.push_back(neurons[nn].recovery());
     return vals;
+}
+
+std::set<size_t> Network::step(const std::vector<double>& input) {
+	
+	std::set<size_t> firing_neurons;
+	double excitators(0.0);
+	double inhibitors(0.0);
+	double input_n(0.0);
+		for(size_t i(0); i < neurons.size(); ++i)
+		{
+			if(neurons[i].firing()) 
+			{ 
+				neurons[i].reset();
+			}
+			std::vector<std::pair<size_t, double>> neighbor = neighbors(i);
+			for(size_t i(0); i < neighbor.size(); ++i) 
+			{
+				if(neurons[neighbor[i].first].firing())
+				{
+					if(neurons[neighbor[i].first].is_inhibitory()) inhibitors += neighbor[i].second;
+					else excitators += neighbor[i].second;
+				}
+			}
+		if(neurons[i].is_inhibitory()) 
+		{
+			input_n = 0.4*input[i] + 0.5*inhibitors + excitators;
+		} else {
+			input_n = input[i] + 0.5*inhibitors + excitators;
+		}
+		neurons[i].input(input_n);
+		neurons[i].step();
+		if(neurons[i].firing()) firing_neurons.insert(i);
+	}
+	
+	return firing_neurons;
 }
 
 void Network::print_params(std::ostream *_out) {
